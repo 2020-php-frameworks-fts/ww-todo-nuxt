@@ -1,5 +1,5 @@
 <template>
-  <v-row justify="center" align="bottom" style="height: 100%; align-items: center; justify-content: center;">
+  <v-row justify="center" style="height: 100%; align-items: center; justify-content: center;">
     <v-col lg="4" md="6">
       <v-card>
         <v-card-title>
@@ -58,20 +58,19 @@ export default {
       if (!this.isFormValid) {
         return
       }
-      await this.login({
+      const res = await this.login({
         login: this.form.login,
         password: this.form.password
       })
-      // this.$router.push('main')
+      if (res) {
+        await this.$router.push('main')
+      }
     },
     async handleRegister () {
       if (!this.isFormValid) {
         return
       }
-      const res = await this.register(this.form)
-      if (res) {
-        await this.$router.push('main')
-      }
+      await this.register(this.form)
     }
   }
 }
