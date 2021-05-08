@@ -8,6 +8,8 @@
       <v-app-bar-title>
         TODO APP
       </v-app-bar-title>
+      <v-spacer/>
+      <span v-if="user_id.length > 0">Logged AS {{ user_id }}</span>
     </v-app-bar>
     <v-main>
       <v-container style="height: 100%">
@@ -24,6 +26,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   data () {
     return {
@@ -47,6 +50,9 @@ export default {
       rightDrawer: false,
       title: 'Vuetify.js'
     }
+  },
+  computed: {
+    ...mapGetters('session', ['user_id'])
   }
 }
 </script>

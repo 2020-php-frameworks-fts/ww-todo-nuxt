@@ -6,12 +6,12 @@
           <v-card-title>
             Tasks to do
           </v-card-title>
-          <v-card-subtitle v-if="!taskmock.undone.length">
+          <v-card-subtitle v-if="!undoneTodos.length">
             Empty list
           </v-card-subtitle>
           <v-divider/>
           <v-list>
-            <v-list-item v-for="task in taskmock.undone" :key="task" class="list-item">
+            <v-list-item v-for="task in undoneTodos" :key="task" class="list-item">
               <v-list-item-content>
                 <v-list-item-title>
                   {{ task }}
@@ -34,12 +34,12 @@
           <v-card-title>
             Done Tasks
           </v-card-title>
-          <v-card-subtitle v-if="!taskmock.done.length">
+          <v-card-subtitle v-if="!doneTodos.length">
             Empty list
           </v-card-subtitle>
           <v-divider/>
           <v-list>
-            <v-list-item v-for="task in taskmock.done" :key="task" class="list-item">
+            <v-list-item v-for="task in doneTodos" :key="task" class="list-item">
               <v-list-item-content>
                 <v-list-item-title>
                   {{ task }}
@@ -65,7 +65,9 @@
         </v-card-title>
         <v-form class="new-task-form">
           <v-text-field dark v-model="inputData"/>
+          <span>{{ error }}</span>
           <v-btn
+            :loading="isLoading"
             plain
             @click="addNewTask"
           >
@@ -78,44 +80,53 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: '',
   data: () => ({
     taskmock: {
       undone: [
-        'Jeden',
-        'dwa',
-        'trzy',
-        'cztery',
-        'piec',
-        'szesc'
       ],
       done: [
-        'Jeden1',
-        'dwa2',
-        'trzy3',
-        'cztery4',
-        'piec5',
-        'szesc6'
       ]
     },
     inputData: ''
   }),
+  async fetch () {
+    await this.getTodos(this.user_id)
+  },
+  computed: {
+    ...mapGetters('tasks', ['doneTodos', 'undoneTodos', 'isLoading', 'error']),
+    ...mapGetters('session', ['user_id'])
+  },
   methods: {
-    addNewTask () {
+    ...mapActions('tasks', ['createTodo', 'getTodos', 'setTodoState', 'deleteTodo']),
+    async addNewTask () {
       if (this.inputData.length === 0) {
         return
       }
-      this.taskmock.undone.push(this.inputData)
+      const res = await this.createTodo({
+        name: this.inputData,
+        user_id: this.user_id
+      })
+      if (res) {
+        await this.getTodos(this.user_id)
+      }
       this.inputData = ''
     },
-    removeTask (taskName, collection) {
-      const index = this.taskmock[collection].findIndex(task => task === taskName)
-      this.taskmock[collection].splice(index, 1)
+    async removeTask (taskName, collection) {
+      await this.deleteTodo({
+        name: taskName,
+        user_id: this.user_id
+      })
     },
-    changeTaskState (taskName, collection, collectionTo) {
-      this.taskmock[collectionTo].push(taskName)
-      this.removeTask(taskName, collection)
+    async changeTaskState (taskName, collection, collectionTo) {
+      const newTaskState = {
+        user_id: this.user_id,
+        name: taskName,
+        state: collectionTo === 'undone'
+      }
+      await this.setTodoState(newTaskState)
     }
   }
 }
