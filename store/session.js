@@ -9,7 +9,7 @@ export const state = () => ({
 
 export const mutations = {
   SET_SESSION (state, auth) {
-    state.session.login = { ...auth }
+    state.session.login = auth.login
   },
   SET_ERROR (state, error) {
     state.error = error
@@ -70,6 +70,10 @@ export const actions = {
       })
       return true
     }
+    if (res.status === 202) {
+      commit('SET_ERROR', 'MYSQL CONNECTION ERROR')
+      return false
+    }
     if (res.status === 203) {
       commit('SET_ERROR', 'WRONG LOGIN OR PASSWORD')
       return false
@@ -80,5 +84,6 @@ export const actions = {
 
 export const getters = {
   error: state => state.error,
-  isLoading: state => state.isLoading
+  isLoading: state => state.isLoading,
+  user_id: state => state.session.login
 }
