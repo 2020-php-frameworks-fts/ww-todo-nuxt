@@ -52,7 +52,30 @@ export const actions = {
         commit('SET_ERROR', 'UKNOW ERROR')
     }
   },
-  login () {}
+  async login ({ commit }, auth) {
+    commit('SET_LOADING', true)
+    const formData = new FormData()
+    formData.set('login', auth.login)
+    formData.set('password', auth.password)
+    const res = await this.$axios({
+      method: 'post',
+      url: 'http://localhost/login.php',
+      data: formData
+    })
+    commit('SET_LOADING', false)
+    if (res.status === 200) {
+      commit('SET_SESSION', {
+        login: res.data,
+        password: auth.password
+      })
+      return true
+    }
+    if (res.status === 203) {
+      commit('SET_ERROR', 'WRONG LOGIN OR PASSWORD')
+      return false
+    }
+    return false
+  }
 }
 
 export const getters = {

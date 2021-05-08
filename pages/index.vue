@@ -54,15 +54,24 @@ export default {
   },
   methods: {
     ...mapActions('session', ['login', 'register']),
-    handleSubmit () {
-      // eslint-disable-next-line no-console
-      this.$router.push('main')
+    async handleSubmit () {
+      if (!this.isFormValid) {
+        return
+      }
+      await this.login({
+        login: this.form.login,
+        password: this.form.password
+      })
+      // this.$router.push('main')
     },
     async handleRegister () {
       if (!this.isFormValid) {
         return
       }
-      await this.register(this.form)
+      const res = await this.register(this.form)
+      if (res) {
+        await this.$router.push('main')
+      }
     }
   }
 }
